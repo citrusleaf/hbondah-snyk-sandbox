@@ -6,7 +6,7 @@ require (
 	github.com/BurntSushi/toml v1.2.1
 	github.com/aerospike/aerospike-client-go/v7 v7.6.1
 	github.com/gobwas/glob v0.2.3
-	github.com/hashicorp/go-version v1.3.0
+	github.com/hashicorp/go-version v1.0.0
 	github.com/prometheus/client_golang v1.14.0
 	github.com/prometheus/procfs v0.12.0
 	github.com/sirupsen/logrus v1.9.0

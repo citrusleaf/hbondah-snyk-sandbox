@@ -1,6 +1,6 @@
 module github.com/aerospike/aerospike-prometheus-exporter
 
-go 1.20
+go 1.10
 
 require (
 	github.com/BurntSushi/toml v1.2.1
@@ -15,7 +15,8 @@ require (
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc v0.44.0
 	go.opentelemetry.io/otel/metric v1.21.0
 	go.opentelemetry.io/otel/sdk v1.21.0
-	go.opentelemetry.io/otel/sdk/metric v1.21.0)
+	go.opentelemetry.io/otel/sdk/metric v1.21.0
+)
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect

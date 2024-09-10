@@ -1,22 +1,21 @@
 module github.com/aerospike/aerospike-prometheus-exporter
 
-go 1.10
+go 1.20
 
 require (
-	github.com/BurntSushi/toml v1.2.0
-	github.com/aerospike/aerospike-client-go/v7 v7.6.0
-	github.com/gobwas/glob v0.2.0
-	github.com/hashicorp/go-version v1.3.0
-	github.com/prometheus/client_golang v1.13.0
-	github.com/prometheus/procfs v0.11.0
-	github.com/sirupsen/logrus v1.8.0
-	github.com/stretchr/testify v1.8.3
-	go.opentelemetry.io/otel v1.22.0
-	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc v0.43.0
-	go.opentelemetry.io/otel/metric v1.20.0
-	go.opentelemetry.io/otel/sdk v1.20.0
-	go.opentelemetry.io/otel/sdk/metric v1.20.0
-)
+	github.com/BurntSushi/toml v1.2.1
+	github.com/aerospike/aerospike-client-go/v7 v7.6.1
+	github.com/gobwas/glob v0.2.3
+	github.com/hashicorp/go-version v1.6.0
+	github.com/prometheus/client_golang v1.14.0
+	github.com/prometheus/procfs v0.12.0
+	github.com/sirupsen/logrus v1.9.0
+	github.com/stretchr/testify v1.8.4
+	go.opentelemetry.io/otel v1.21.0
+	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc v0.44.0
+	go.opentelemetry.io/otel/metric v1.21.0
+	go.opentelemetry.io/otel/sdk v1.21.0
+	go.opentelemetry.io/otel/sdk/metric v1.21.0)
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect

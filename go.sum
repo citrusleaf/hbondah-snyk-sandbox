@@ -1,7 +1,8 @@
 github.com/BurntSushi/toml v1.2.1 h1:9F2/+DoOYIOksmaJFPw1tGFy1eDnIJXg+UHjuD8lTak=
 github.com/BurntSushi/toml v1.2.1/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbicEuybxQ=
-github.com/aerospike/aerospike-client-go/v5 v5.2.0 h1:zuGD8jw/MWP3e5rWoIaodjd1YnZxpAfu+gU464mVxSg=
-github.com/aerospike/aerospike-client-go/v5 v5.2.0/go.mod h1:NKkXKEba9XtHKQmzBMIxQK5q59wDjUPVV1iUtuJOnbY=
+github.com/aerospike/aerospike-client-go v1.39.0 h1:4TBtyTU3qcJfhuVPDAkwjX7/x2D+aR6NDQPXBAPjuWI=
+github.com/aerospike/aerospike-client-go v2.10.0+incompatible h1:9Mz/AehV/GItg2/pgmCQrM5/NnWMmL8f6mt6huPivM0=
+github.com/aerospike/aerospike-client-go v2.10.0+incompatible/go.mod h1:zj8LBEnWBDOVEIJt8LvaRvDG5ARAoa5dBeHaB472NRc=
 github.com/beorn7/perks v1.0.1 h1:VlbKKnNfV8bJzeqoa4cOKqO6bYr3WgKZxO8Z16+hsOM=
 github.com/beorn7/perks v1.0.1/go.mod h1:G2ZrVWU2WbWT9wwq4/hrbKbnv/1ERSJQ0ibhJ6rlkpw=
 github.com/cenkalti/backoff/v4 v4.2.1 h1:y4OZtCnogmCPw98Zjyt5a6+QwPLGkiQsYW5oUqylYbM=

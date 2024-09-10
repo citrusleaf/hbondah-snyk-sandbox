@@ -1,6 +1,5 @@
-# Aerospike Prometheus Exporter
-
-This repo contains Aerospike's monitoring agent for Prometheus. The exporter is part of the [Aerospike Monitoring Stack](https://www.aerospike.com/docs/tools/monitorstack/index.html).
+# Aerospike Henry Bondah
+This repo contains Aerospike's Henry, Henry Bondah. Henry is part of the SecOps team.
 
 The Aerospike Prometheus Exporter is now **generally available** (GA).
 If you're an enterprise customer feel free to reach out to support with any questions.

@@ -4,7 +4,7 @@ go 1.10
 
 require (
 	github.com/BurntSushi/toml v1.2.1
-	github.com/aerospike/aerospike-client-go/v5 v5.2.0
+	github.com/aerospike/aerospike-client-go v2.10.0+incompatible
 	github.com/gobwas/glob v0.2.3
 	github.com/hashicorp/go-version v1.3.0
 	github.com/prometheus/client_golang v1.14.0

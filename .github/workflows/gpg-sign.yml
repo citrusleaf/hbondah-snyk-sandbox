@@ -120,7 +120,7 @@ jobs:
           name: demo-artifacts
 
       - name: setup GPG
-        uses: citrusleaf/snyk-demo/setup-gpg@main
+        uses: aerospike/shared-workflows/devops/setup-gpg@pvinh-gpg-sign-example
         with:
           gpg-private-key: ${{ secrets.GPG_SECRET_KEY }}
           gpg-public-key: ${{ secrets.GPG_PUBLIC_KEY }}

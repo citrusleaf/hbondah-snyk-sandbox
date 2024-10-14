@@ -1,0 +1,165 @@
+name: Build, scan, sign, checksum artifacts
+on: workflow_dispatch
+jobs:
+  build:
+    outputs:
+      version: ${{ steps.save-version.outputs.version }}
+      rpm-version: ${{ steps.save-version.outputs.rpm-version }}
+      artifacts: ${{ steps.save-version.outputs.artifacts }}
+      rpm-artifacts: ${{ steps.artifacts-list.outputs.rpm-artifacts }}
+      deb-artifacts: ${{ steps.artifacts-list.outputs.deb-artifacts }}
+      zip-artifacts: ${{ steps.artifacts-list.outputs.zip-artifacts }}
+      pkg-artifacts: ${{ steps.artifacts-list.outputs.pkg-artifacts }}
+      sha-artifacts: ${{ steps.artifacts-list.outputs.sha-artifacts }}
+      asc-artifacts: ${{ steps.artifacts-list.outputs.asc-artifacts }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - uses: snyk/actions/setup@master
+      - name: Set up go
+        uses: actions/setup-go@master
+        with:
+          go-version: '1.23.0'
+
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/golang@master
+        continue-on-error: true # To make sure that SARIF upload gets called
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: test
+          args: --all-projects --sarif-file-output=snyk-test.sarif
+
+      - name: Upload snyk test
+        uses: actions/upload-artifact@v4
+        with:
+          name: snyk-test.sarif
+          path: ~/work/hbondah-snyk-sandbox/hbondah-snyk-sandbox/snyk-test.sarif
+
+      - name: Run Snyk Code to check for vulnerabilities
+        uses: snyk/actions/golang@master
+        continue-on-error: true # To make sure that SARIF upload gets called
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: code test
+          args: --all-projects --sarif-file-output=snyk-code.sarif
+
+      - name: Upload snyk code
+        uses: actions/upload-artifact@v4
+        with:
+          name: snyk-code.sarif
+          path: ~/work/hbondah-snyk-sandbox/hbondah-snyk-sandbox/snyk-code.sarif
+
+      - name: Build rpm & deb
+        run: |
+          mkdir -p artifacts
+          cp packages/*.rpm packages/*.deb artifacts/
+
+      - name: Build pkg
+        run: |
+          cp packages/*.pkg artifacts/
+
+      - name: Build zip
+        run: |
+          cp packages/*.zip artifacts/
+        
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: demo-artifacts
+          path: ~/work/hbondah-snyk-sandbox/hbondah-snyk-sandbox/artifacts/*
+       
+      - name: Artifacts listing
+        id: artifacts-list
+        run: |
+          VER=$(cat VERSION.md)
+          echo version=${VER} >> $GITHUB_OUTPUT
+
+          RPM_VER=$(echo ${VER} | sed 's/-/_/g')
+          echo rpm-verion=${RPM_VER} >> $GITHUB_OUTPUT
+
+          ARTIFACTS="asvec-linux-amd64-${VER}.deb asvec-linux-arm64-${VER}.deb asvec-linux-amd64-${VER}.rpm asvec-linux-arm64-${VER}.rpm asvec-linux-amd64-${VER}.zip asvec-linux-arm64-${VER}.zip asvec-macos-${VER}.pkg asvec-macos-amd64-${VER}.zip asvec-macos-arm64-${VER}.zip asvec-windows-amd64-${VER}.zip asvec-windows-arm64-${VER}.zip"
+                echo "artifacts=${ARTIFACTS}" >> $GITHUB_OUTPUT
+
+                RPM_ARTIFACTS=$(echo "${ARTIFACTS}" | tr ' ' '\n' | grep '\.rpm$' | tr '\n' ' ')
+                echo "rpm-artifacts=${RPM_ARTIFACTS}" >> $GITHUB_OUTPUT
+
+                DEB_ARTIFACTS=$(echo "${ARTIFACTS}" | tr ' ' '\n' | grep '\.deb$' | tr '\n' ' ')
+                echo "deb-artifacts=${DEB_ARTIFACTS}" >> $GITHUB_OUTPUT
+
+                ZIP_ARTIFACTS=$(echo "${ARTIFACTS}" | tr ' ' '\n' | grep '\.zip$' | tr '\n' ' ')
+                echo "zip-artifacts=${ZIP_ARTIFACTS}" >> $GITHUB_OUTPUT
+
+                PKG_ARTIFACTS=$(echo "${ARTIFACTS}" | tr ' ' '\n' | grep '\.pkg$' | tr '\n' ' ')
+                echo "pkg-artifacts=${PKG_ARTIFACTS}" >> $GITHUB_OUTPUT
+
+                SHA256_FILES=$(for pkg in ${ARTIFACTS}; do echo "${pkg}.sha256"; done | tr '\n' ' ')
+                echo "sha-artifacts=${SHA256_FILES}" >> $GITHUB_OUTPUT
+
+                ASC_FILES=$(for pkg in ${ARTIFACTS} ${SHA256_FILES}; do
+                  if [[ ! "${pkg}" =~ \.rpm$ && ! "${pkg}" =~ \.deb$ ]]; then
+                  echo "${pkg}.asc"
+                  fi
+                done | tr '\n' ' ')
+                echo "asc-artifacts=${ASC_FILES}" >> $GITHUB_OUTPUT
+
+
+  sign:
+    need: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Git checkout"
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: "Download Artifacts"
+        uses: actions/download-artifact@v4
+        with:
+          name: demo-artifacts
+
+      - name: setup GPG
+        uses: citrusleaf/snyk-demo/setup-gpg@main
+        with:
+          gpg-private-key: ${{ secrets.GPG_SECRET_KEY }}
+          gpg-public-key: ${{ secrets.GPG_PUBLIC_KEY }}
+          gpg-key-pass: ${{ secrets.GPG_PASS }}
+          gpg-key-name: "aerospike-inc"
+   
+      - name: List keys
+        run: gpg -K
+
+      - name: GPG Sign All Files
+        env:
+          GPG_TTY: no-tty
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASS }}
+        run: |
+          rpm --addsign ${{needs.build.outputs.rpm-artifacts}}
+          rpm --checksig ${{needs.build.outputs.rpm-artifacts}}
+
+          dpkg-sig --sign builder ${{needs.build.outputs.deb-artifacts}}
+          dpkg-sig --verify ${{needs.build.outputs.deb-artifacts}}
+
+          for file in ${{needs.build.outputs.zip-artifacts}} ${{needs.build.outputs.pkg-artifacts}}; do
+            gpg --detach-sign --no-tty --batch --yes --output "${file}.asc" --passphrase "$GPG_PASSPHRASE" "${file}"
+            gpg --verify "${file}.asc" "${file}"
+          done
+
+      - name: Create Checksums
+        run: |
+          for pkg in ${{needs.build.outputs.artifacts}}; do
+            shasum -a 256 $pkg > ${pkg}.sha256
+          done
+
+          for file in ${{needs.build.outputs.sha-artifacts}}; do
+            gpg --detach-sign --no-tty --batch --yes --output "${file}.asc" --passphrase "$GPG_PASSPHRASE" "${file}"
+            gpg --verify "${file}.asc" "${file}"
+          done
+      - name: "Upload Artifacts"
+        uses: actions/upload-artifact@v4
+        with:
+          name: demo-artifacts
+          path: asvec-*
+          overwrite: true
+    
